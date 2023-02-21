@@ -4,10 +4,12 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Michael", "Levin", , "michael.levin@pennmedicine.upenn.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9937-9932"))
-Description: A set of function that uses plink to calculate polygenic risk
-    scores (PRS) on a target dataset given a base dataset that includes
-    variants, effect alleles, and corresponding weights.
+Description: A set of functions that use plink2 to calculate polygenic
+    risk scores (PRS) on a target dataset given a base dataset that
+    includes variants, effect alleles, and corresponding weights.
 License: MIT + file LICENSE
+URL: https://github.com/mglev1n/prsr, https://mglev1n.github.io/prsr/
+BugReports: https://github.com/mglev1n/prsr/issues
 Imports: 
     checkmate,
     data.table,
@@ -30,6 +32,3 @@ VignetteBuilder:
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-URL: https://github.com/mglev1n/prsr,
-    https://mglev1n.github.io/prsr/
-BugReports: https://github.com/mglev1n/prsr/issues

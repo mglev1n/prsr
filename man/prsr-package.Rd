@@ -6,7 +6,7 @@
 \alias{prsr-package}
 \title{prsr: Calculate PRS Using Plink}
 \description{
-A set of function that uses plink to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.
+A set of functions that use plink2 to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.
 }
 \seealso{
 Useful links:

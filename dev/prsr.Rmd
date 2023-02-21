@@ -33,7 +33,7 @@ fusen::fill_description(
   pkg = here::here(),
   fields = list(
     Title = "Calculate PRS using plink2",
-    Description = "A set of function that uses plink2 to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.",
+    Description = "A set of functions that use plink2 to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.",
     `Authors@R` = c(
       person("Michael", "Levin", email = "michael.levin@pennmedicine.upenn.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9937-9932"))
     )
