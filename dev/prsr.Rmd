@@ -187,6 +187,8 @@ Here are some unit tests to verify the function works as expected.
 
 ```{r tests-plink_prs}
 test_that("plink_prs works", {
+  skip_on_cran()
+  skip_on_ci()
   # load weights file into dataframe
   weights_df <- fs::path_package("extdata", "PGS000667-PMBB.txt", package = "prsr") %>%
     vroom::vroom()
@@ -200,8 +202,6 @@ test_that("plink_prs works", {
     pfile_dir = "/project/PMBB/PMBB-Release-2020-2.0/Imputed/pgen/",
     plink_bin = "/scratch/Applications/PLINK/plink2_linux_x86_64_20211125/plink2a"
   )
-  skip_on_cran()
-  skip_on_ci()
   expect_s3_class(prs_res, "data.frame")
 })
 ```
