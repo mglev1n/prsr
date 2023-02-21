@@ -6,7 +6,7 @@
 [![R-CMD-check](https://github.com/mglev1n/prsr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mglev1n/prsr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of prsr is to provide a set of convenience functions relevant for calculating polygenic risk scores on a target dataset. The package uses plink2 to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.
+The goal of `prsr` is to provide a set of convenience functions relevant for calculating polygenic risk scores on a target dataset. The package uses plink2 (<https://www.cog-genomics.org/plink/2.0/>) to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.
 
 ## Installation
 
