@@ -116,7 +116,11 @@ This should be a reproducible and working example
 calculate a prs, given weights from <code>weights_df</code> and genotype
 information contained in the
 <code>/project/PMBB/PMBB-Release-2020-2.0/Imputed/pgen/</code>
-directory.</p>
+directory. The variant ids in the <code>weights_df</code> file should
+correspond to the variant ids in the plink files specified by
+<code>pfile_dir</code>. This may require the use of a crosswalk between
+rsids and chrom:pos:ref:alt, depending on the variant naming conventions
+of the base/target datasets.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#' \dontrun{</span></span>
 <span><span class="co"># load weights file into dataframe</span></span>
