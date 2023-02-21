@@ -17,7 +17,7 @@ plink_prs(
 \arguments{
 \item{base_df}{(dataframe) A dataframe containing at minimum variant ids, effect alleles, and corresponding effect sizes}
 
-\item{id_col}{(character) Name of column containing variant ids}
+\item{id_col}{(character) Name of column containing variant ids, corresponding to the variant ids in the plink files}
 
 \item{effect_allele_col}{(character) Name of column containing effect alleles}
 

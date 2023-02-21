@@ -3,7 +3,7 @@
 #' Calculate PRS using plink2
 #'
 #' @param base_df (dataframe) A dataframe containing at minimum variant ids, effect alleles, and corresponding effect sizes
-#' @param id_col (character) Name of column containing variant ids
+#' @param id_col (character) Name of column containing variant ids, corresponding to the variant ids in the plink files
 #' @param effect_allele_col (character) Name of column containing effect alleles
 #' @param effect_size_col (character) Name of column containing effect estimates
 #' @param multithread (logical) Should multi-threading be used to compute PRS across all pfiles in parallel (default = TRUE)

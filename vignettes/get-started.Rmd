@@ -56,7 +56,7 @@ Here is an example on how to use the function.
 This should be a reproducible and working example
 -->
 
-Here is an example of using the `plink_prs()` function to calculate a prs, given weights from `weights_df` and genotype information contained in the `/project/PMBB/PMBB-Release-2020-2.0/Imputed/pgen/` directory.
+Here is an example of using the `plink_prs()` function to calculate a prs, given weights from `weights_df` and genotype information contained in the `/project/PMBB/PMBB-Release-2020-2.0/Imputed/pgen/` directory. The variant ids in the `weights_df` file should correspond to the variant ids in the plink files specified by `pfile_dir`. This may require the use of a crosswalk between rsids and chrom:pos:ref:alt, depending on the variant naming conventions of the base/target datasets.
 
 
 ```{r examples-plink_prs, eval = FALSE}
