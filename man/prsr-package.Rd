@@ -8,6 +8,15 @@
 \description{
 A set of function that uses plink to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/mglev1n/prsr}
+  \item \url{https://mglev1n.github.io/prsr/}
+  \item Report bugs at \url{https://github.com/mglev1n/prsr/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Michael Levin \email{michael.levin@pennmedicine.upenn.edu} (\href{https://orcid.org/0000-0002-9937-9932}{ORCID})
 

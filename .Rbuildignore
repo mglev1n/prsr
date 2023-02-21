@@ -4,3 +4,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^prsr\.Rproj$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
