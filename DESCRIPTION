@@ -1,0 +1,32 @@
+Package: prsr
+Title: Calculate PRS Using Plink
+Version: 0.0.0.9000
+Authors@R: 
+    person("Michael", "Levin", , "michael.levin@pennmedicine.upenn.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9937-9932"))
+Description: A set of function that uses plink to calculate polygenic risk
+    scores (PRS) on a target dataset given a base dataset that includes
+    variants, effect alleles, and corresponding weights.
+License: MIT + file LICENSE
+Imports: 
+    checkmate,
+    data.table,
+    dplyr,
+    fs,
+    furrr,
+    future,
+    magrittr,
+    purrr,
+    stringr,
+    tibble,
+    tidyr
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat,
+    vroom
+VignetteBuilder: 
+    knitr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

@@ -1,0 +1,227 @@
+---
+title: "prsr"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- 
+Run this 'development' chunk
+
+Store every call to library() that you need to run chunks line by line, as in a classical Rmd for analysis
+-->
+
+```{r development, include=FALSE}
+library(tidyverse)
+library(testthat)
+library(devtools)
+library(usethis)
+```
+
+<!--
+# Description of your package
+
+This will fill the description of your package.
+Fill and run the content of this chunk, before anything else. 
+
+Note: when you will use other flat templates, this part will be in a separate file. Do not be surprised!
+--> 
+
+```{r description, eval=FALSE}
+# Describe your package
+fusen::fill_description(
+  pkg = here::here(),
+  fields = list(
+    Title = "Calculate PRS using plink2",
+    Description = "A set of function that uses plink2 to calculate polygenic risk scores (PRS) on a target dataset given a base dataset that includes variants, effect alleles, and corresponding weights.",
+    `Authors@R` = c(
+      person("Michael", "Levin", email = "michael.levin@pennmedicine.upenn.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9937-9932"))
+    )
+  )
+)
+# Define License with use_*_license()
+usethis::use_mit_license("Michael Levin")
+usethis::use_pipe()
+usethis::use_tibble()
+```
+
+# Calculate PRS
+
+<!-- 
+This first section shows:
+
+- the three parts necessary for a package: 'function', 'examples' and 'tests'.  
+  + Note that the three following chunks have names accordingly.
+
+-->
+
+The `plink_prs()` function can be used to calculate a PRS using plink2, given a dataframe containing variant ids, effect alleles, corresponding weights, and a directory containing individual-level genotypes for the target population.
+
+```{r function-plink_prs}
+#' Calculate PRS using plink2
+#'
+#' @param base_df (dataframe) A dataframe containing at minimum variant ids, effect alleles, and corresponding effect sizes
+#' @param id_col (character) Name of column containing variant ids
+#' @param effect_allele_col (character) Name of column containing effect alleles
+#' @param effect_size_col (character) Name of column containing effect estimates
+#' @param multithread (logical) Should multi-threading be used to compute PRS across all pfiles in parallel (default = TRUE)
+#' @param pfile_dir (character) Directory containing the plink files for the target dataset. If the directory contains multiple files (for example, one per chromosome), the PRS can be calculated in parallel.
+#' @param plink_bin (character) Path to executable plink2 binary
+#'
+#' @return A [tibble][tibble::tibble-package] containing rows for each individual in the target dataset, and a column containing their PRS
+#'
+#' @import dplyr
+#' @export
+
+plink_prs <- function(base_df, id_col, effect_allele_col, effect_size_col, multithread = TRUE, pfile_dir, plink_bin) {
+  # Check inputs
+  checkmate::assert_data_frame(base_df)
+  checkmate::assert_directory(pfile_dir)
+  checkmate::assert_file_exists(plink_bin)
+
+  temp_path <- fs::path_temp()
+
+  # on.exit(unlink(plink_input), add = TRUE)
+  on.exit(unlink(temp_path, recursive = TRUE), add = TRUE)
+
+  # create temporary input file
+  plink_input <- fs::path_abs(fs::file_temp(pattern = "plink_input", tmp_dir = temp_path))
+
+  # write variants for plink input
+  plink_df <- base_df %>%
+    select(id = {{ id_col }}, effect_allele = {{ effect_allele_col }}, {{ effect_size_col }}) %>%
+    mutate(effect_allele = stringr::str_to_upper(effect_allele))
+
+  # return(plink_df)
+
+  plink_df %>%
+    distinct(id, .keep_all = TRUE) %>%
+    data.table::fwrite(plink_input, col.names = TRUE, sep = "\t")
+
+  # run plink on input files to generate PRS
+  shell <- ifelse(Sys.info()["sysname"] == "Windows", "cmd", "sh")
+
+  pfiles <- fs::dir_ls(pfile_dir) %>%
+    tibble::enframe(name = NULL) %>%
+    mutate(filename = stringr::str_replace_all(value, ".pvar$|.psam$|.pgen$", "")) %>%
+    distinct(filename)
+
+  generate_prs <- function(x) {
+    res <- try({
+      prs_output <- fs::path_abs(fs::file_temp(pattern = "prs_output", tmp_dir = temp_path))
+      # prs_output <- "/scratch/.temp/"
+      .plink <- paste0(
+        shQuote(plink_bin, type = shell),
+        " --pfile ", shQuote(x, type = shell),
+        " --geno dosage ",
+        " --extract ", shQuote(plink_input, type = shell),
+        " --score ", shQuote(plink_input, type = shell),
+        " header-read cols=+scoresums ignore-dup-ids ",
+        " --threads 1",
+        " --memory 8000 ",
+        " --out ", shQuote(prs_output, type = shell)
+      )
+
+      system(.plink)
+
+      prs_res <- data.table::fread(paste0(prs_output, ".sscore")) %>%
+        as_tibble()
+
+      return(prs_res)
+    })
+    if (is.data.frame(res)) {
+      return(res)
+    } else {
+      return(tibble())
+    }
+  }
+
+  if (multithread) {
+    future::plan(future::multisession())
+    prs_res <- furrr::future_map_dfr(pfiles$filename, generate_prs, .progress = TRUE)
+  } else {
+    prs_res <- purrr::map_dfr(pfiles$filename, generate_prs)
+  }
+
+  prs_res %>%
+    select(PMBB_ID = IID, ALLELE_CT, ends_with("_SUM")) %>%
+    tidyr::pivot_longer(cols = ends_with("_SUM"), names_to = "PGS", values_to = "value") %>%
+    group_by(PMBB_ID, PGS) %>%
+    summarize(
+      n_variants = sum(ALLELE_CT) / 2,
+      prs = sum(value)
+    ) %>%
+    ungroup() %>%
+    filter(!stringr::str_detect(PGS, "NAMED_ALLELE_DOSAGE_SUM"))
+}
+```
+
+<!--
+Here is an example on how to use the function.
+This should be a reproducible and working example
+-->
+
+Here is an example of using the `plink_prs()` function to calculate a prs, given weights from `weights_df` and genotype information contained in the `/project/PMBB/PMBB-Release-2020-2.0/Imputed/pgen/` directory.
+
+```{r examples-plink_prs, eval=FALSE}
+#' \dontrun{
+# load weights file into dataframe
+weights_df <- fs::path_package("extdata", "PGS000667-PMBB.txt", package = "prsr") %>%
+  vroom::vroom()
+
+# calculate prs
+prs_res <- plink_prs(
+  base_df = weights_df,
+  id_col = variant,
+  effect_allele_col = effect_allele,
+  effect_size_col = effect_weight_mg_dl,
+  pfile_dir = "/project/PMBB/PMBB-Release-2020-2.0/Imputed/pgen/",
+  plink_bin = "/scratch/Applications/PLINK/plink2_linux_x86_64_20211125/plink2a"
+)
+#' }
+```
+
+<!--
+Here are some unit tests to verify the function works as expected.
+-->
+
+```{r tests-plink_prs}
+test_that("plink_prs works", {
+  # load weights file into dataframe
+  weights_df <- fs::path_package("extdata", "PGS000667-PMBB.txt", package = "prsr") %>%
+    vroom::vroom()
+
+  # calculate prs
+  prs_res <- plink_prs(
+    base_df = weights_df,
+    id_col = variant,
+    effect_allele_col = effect_allele,
+    effect_size_col = effect_weight_mg_dl,
+    pfile_dir = "/project/PMBB/PMBB-Release-2020-2.0/Imputed/pgen/",
+    plink_bin = "/scratch/Applications/PLINK/plink2_linux_x86_64_20211125/plink2a"
+  )
+  skip_on_cran()
+  skip_on_ci()
+  expect_s3_class(prs_res, "data.frame")
+})
+```
+
+<!-- 
+# Inflate your package
+
+You're one inflate from paper to box.
+Build your package from this very Rmd using `fusen::inflate()` 
+-->
+
+
+```{r development-inflate, eval=FALSE}
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/prsr.Rmd")
+```
+
+<!-- 
+- Verify your `"DESCRIPTION"` file has been updated
+- Verify your function is in `"R/"` directory
+- Verify your test is in `"tests/testthat/"` directory
+- Verify this Rmd appears in `"vignettes/"` directory 
+-->
